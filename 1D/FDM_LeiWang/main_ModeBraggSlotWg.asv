@@ -1,0 +1,68 @@
+I = sqrt(-1);
+Pi = 3.1416;
+lambda0 = 1.55e-6; %1.15;
+k0 = 2*Pi/lambda0;
+
+
+dx = 0.5e-9;
+nSiO2 = 1.44;
+nSi = 3.445;
+
+thnSiO2 = 1/4*lambda0/nSiO2;
+thnSi = 1/4*lambda0/nSi;
+np = 4;
+
+vNeff = zeros(1,np*2+2);
+vThickness = zeros(1,np*2+2);
+for i=1:np
+    vNeff(i*2) = nSi;
+    vThickness(i*2) = thnSi;
+    vNeff(i*2+1) = thnSi;
+    vThickness(i*2+1) = thnSiO2;
+end
+%vL((nn-1)/2+1) = d1*2;
+vThickness(1) = 2e-6;
+vNeff(1) = nSiO2;
+vThickness(np*2+2) = 2e-6;
+vNeff(np*2+2) = nSiO2;
+
+n = length(vNeff);
+nLayers = zeros(1,n);
+iLayers = ones(1,n+1);
+eeps = [];
+
+for i=1:n
+    nLayers(i) = round(vThickness(i)/dx);
+    iLayers(i+1) = iLayers(i) + nLayers(i);
+    eepsTemp = vNeff(i)^2*ones(1,nLayers(i));
+    eeps = [eeps,eepsTemp];
+end
+
+nx = length(eeps)-1;
+
+boundary = 'oo';  
+%the number of modes to be caculated
+nmodes = 1;
+% the initial guess of the mode index
+guess = 3;
+% caculate the mode
+[vE dAct] = Modesolver1D(eepsAct,k0,dx,nmodes,guess,lambda,boundary,'TE');
+
+
+% neff = zeros(1,nmodes);
+% Gama = zeros(1,nmodes);
+% Intg = zeros(1,nmodes);
+% for(i=1:nmodes)
+%     neff(i) = sqrt(dAct(i,i))/k0
+%     
+%     Gama(i) = sum(abs(vAct(:,i).^2).*vIsAct1.')/sum(abs(vAct(:,i).^2));
+%     vx = dx*(1:nx)*1e6;
+%     Intg(i) = Intergral(vx,vAct(:,i),vx,vPas(:,i),dx)
+%      figure;
+%      hold;
+%       plot(vx,( abs(vAct(:,i)))/max( abs(vAct(:,i))),'r');
+%       plot(vx,( abs(vPas(:,i)))/max( abs(vPas(:,i))),'b');
+%      hold;
+% %      figure;
+% %       plot(dx*(1:nx)*1e6,angle(vAct(:,i))*180/Pi);
+% end;

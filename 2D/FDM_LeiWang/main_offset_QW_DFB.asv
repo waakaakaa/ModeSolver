@@ -1,0 +1,65 @@
+clear
+clc
+close all
+
+I = sqrt(-1);
+Pi = 3.1416;
+lambda = 1.55e-6; %1.15;
+k0 = 2*Pi/lambda;
+
+thnCld = 1.85e-6;
+thnQw = 0.10e-6;
+thnCore = 0.4e-6;
+thnSub = 2e-6;
+
+
+CldInd = 3.1694;
+CldAct = 3.1694;
+QwInd = 3.43;
+CoreInd = 3.37;
+SubInd = 3.1694;
+
+vThickness = [thnSub,thnCore,thnQw,thnCld];
+vNeffAct =   [SubInd,CoreInd,QwInd,CldAct];
+vIsAct  =     [0,    0,        1,     0];
+
+twide = 8e-6;
+tthn = 5e-6;
+ridW = 4e-6;
+
+dx = 0.02e-6;
+dy = 0.01e-6;
+nmodes = 1;
+
+vw = [1:0.5:5]*1e-6;
+
+vGama0
+vGama1 = zeros(1,n);
+n = length(vw);
+vneff = zeros(1,n);
+for i=1:n
+    i
+    %------------------------获得折射率分布矩阵---------------%
+    [eeps,nx,ny,mStEnd] = GenerateEps(vThickness,vNeffAct,[twide,vw(i),twide,twide],1.55,twide,dx,dy);%取得左右对称的多层波导结构的折射率分布矩阵
+
+    guess = CoreInd;
+% caculate the mode
+    boundary = 'oooo';  % the boundary condition must be set 'ss' for slab
+    field = 'ex';
+    A = svbuildmtx (lambda,dx,dy,eeps,boundary,field);% the difference 
+    
+    bIsDrawing = 0;
+    [g,neff] = sveigenmodes(A,guess,nmodes,lambda,nx,ny,[],[],bIsDrawing);
+    vneff(i) = neff;
+    ama = GetConfineBylayerNumbers(mE,nx,ny,iStart,iEnd,mStEnd)%获得iStart layer 到iEnd layer之间光能量占总能量的比例
+end
+plot(vw*1e6,(vneff-min(vneff))/min(vneff)*lambda*1e9);
+% [filename, pathname, filterindex] = uiputfile( ...
+% {'*.mat';},'Save as');
+% str = [pathname,filename];
+% save (str)
+
+
+
+
+

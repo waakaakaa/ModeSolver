@@ -1,0 +1,36 @@
+I = sqrt(-1);
+Pi = 3.1416;
+lambda0 = 1.55e-6; %1.15;
+k0 = 2*Pi/lambda0;
+
+
+dx = 0.5e-9;
+nCld = 3.1694;
+nCore = 3.37;
+
+thnCld = 1.85e-6;
+thnCore = 0.4e-6;
+nAir = 1.44;
+
+
+vEtdep = [0,[1.5:0.025:1.85]*1e-6];%øÃ ¥…Ó∂»
+nn = length(vEtdep);
+
+for i=1:nn
+    vThn = [1e-6,vEtdep(i),thnCld-vEtdep(i),thnCore,6e-6];
+    vN1 = [nAir,   nAir        nCld,       nCore,nCld];
+    [eeps] = GetEpslProf1D(vThn,vN1,0,dx);%epsl profile in waveguide section 
+    vx = [0:length(eeps)-2]*dx;
+
+    boundary = 'oo';  
+    %the number of modes to be caculated
+    nmodes = 1;
+    % the initial guess of the mode index
+    guess = 4;
+    % caculate the mode
+    [vE d] = Modesolver1D(eeps,k0,dx,nmodes,guess,lambda0,boundary,'TM');
+    neff = sqrt(d)/k0
+end
+figure;
+plot(vx,abs(vE.^2)/max(abs(vE.^2)));
+
